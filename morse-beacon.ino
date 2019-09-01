@@ -64,7 +64,7 @@
 //
 // Set output power to 17 dBm = 50 mW.
 //
-#define TX_DBM      17
+#define TX_DBM      10
 
 //
 // Morse speed, words per minute.
@@ -100,11 +100,11 @@ void setup()
         while (1)
             ;
     }
-    LoRa.setSignalBandwidth(41700);
-    LoRa.setCodingRate4(5);
-    LoRa.setSpreadingFactor(6);
-    LoRa.disableCrc();
-    LoRa.setTxPower(TX_DBM);
+//    LoRa.setSignalBandwidth(100);
+//    LoRa.setCodingRate4(5);
+//    LoRa.setSpreadingFactor(6);
+//    LoRa.disableCrc();
+//    LoRa.setTxPower(TX_DBM);
     Serial.println("init ok");
 
     // Initialize OLED display with the I2C address 0x3C.
@@ -118,6 +118,10 @@ void setup()
 
     // Visualize the result.
     display.display();
+
+    //pinMode(34, OUTPUT);
+
+    // LoRa.StartOOK();
 }
 
 void beep(int msec)
@@ -127,13 +131,19 @@ void beep(int msec)
     int plen = (1000L*msec - 19089) / 1536;
 
     digitalWrite(LED, HIGH);        // LED on
+    //digitalWrite(34, HIGH);
 
-    LoRa.setPreambleLength(plen);   // preamble length
-    LoRa.beginPacket(true);         // no header
-    LoRa.write(0);                  // data 1 byte
-    LoRa.endPacket();
+    LoRa.StartOOK();
+    delay(plen);
+    LoRa.StopOOK();
+//    LoRa.setPreambleLength(plen);   // preamble length
+//    LoRa.beginPacket(true);         // no header
+//    LoRa.write(1);                  // data 1 byte
+//    LoRa.endPacket();
+
 
     digitalWrite(LED, LOW);         // LED off
+    //digitalWrite(34, LOW);
 }
 
 void send_morse(char *sym, char *str)
@@ -241,5 +251,5 @@ void send_message(const char *str)
 
 void loop()
 {
-    send_message("KK6ABQ/B QRPP 50 mW FOX HUNT");
+    send_message("TEST");
 }

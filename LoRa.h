@@ -86,6 +86,9 @@ public:
   void writeRegister(uint8_t address, uint8_t value);
   uint8_t singleTransfer(uint8_t address, uint8_t value);
 
+  void StartOOK();
+  void StopOOK();
+
 private:
   void explicitHeaderMode();
   void implicitHeaderMode();

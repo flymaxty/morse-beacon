@@ -20,7 +20,7 @@
 #define REG_PKT_SNR_VALUE        0x19
 #define REG_PKT_RSSI_VALUE       0x1a
 #define REG_MODEM_CONFIG_1       0x1d
-#define REG_MODEM_CONFIG_2       0x1e
+#define REG_MODEM_CONFIG_2       0x31
 #define REG_PREAMBLE_MSB         0x20
 #define REG_PREAMBLE_LSB         0x21
 #define REG_PAYLOAD_LENGTH       0x22
@@ -36,7 +36,7 @@
 #define REG_VERSION              0x42
 
 // modes
-#define MODE_LONG_RANGE_MODE     0x80
+#define MODE_LONG_RANGE_MODE     0x60
 #define MODE_SLEEP               0x00
 #define MODE_STDBY               0x01
 #define MODE_TX                  0x03
@@ -113,17 +113,22 @@ int LoRaClass::begin(long frequency)
   sleep();
 
   // set frequency
-  setFrequency(frequency);
+  // setFrequency(frequency);
 
   // set base addresses
-  writeRegister(REG_FIFO_TX_BASE_ADDR, 0);
-  writeRegister(REG_FIFO_RX_BASE_ADDR, 0);
+  // writeRegister(REG_FIFO_TX_BASE_ADDR, 0);
+  // writeRegister(REG_FIFO_RX_BASE_ADDR, 0);
 
   // set LNA boost
-  writeRegister(REG_LNA, readRegister(REG_LNA) | 0x03);
+  // writeRegister(REG_LNA, readRegister(REG_LNA) | 0x03);
 
   // set auto AGC
-  writeRegister(REG_MODEM_CONFIG_3, 0x04);
+  // writeRegister(REG_MODEM_CONFIG_3, 0x04);
+
+  // set continuous mode
+  Serial.print("CONFIG: ");
+  Serial.println(readRegister(0x01), HEX);
+  writeRegister(REG_MODEM_CONFIG_2, 0x00);
 
   // set output power to 17 dBm
   setTxPower(17);
@@ -159,6 +164,17 @@ int LoRaClass::beginPacket(int implicitHeader)
   writeRegister(REG_PAYLOAD_LENGTH, 0);
 
   return 1;
+}
+
+void LoRaClass::StartOOK() {
+  writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_TX | 0x08);
+}
+
+void LoRaClass::StopOOK() {
+  idle();
+
+    Serial.print("CONFIG: ");
+  Serial.println(readRegister(0x01), HEX);
 }
 
 int LoRaClass::endPacket()
@@ -351,12 +367,12 @@ void LoRaClass::receive(int size)
 
 void LoRaClass::idle()
 {
-  writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY);
+  writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_STDBY | 0x08);
 }
 
 void LoRaClass::sleep()
 {
-  writeRegister(REG_OP_MODE, MODE_LONG_RANGE_MODE | MODE_SLEEP);
+  writeRegister(REG_OP_MODE, 0x68);
 }
 
 void LoRaClass::setTxPower(int level, int outputPin)
@@ -378,7 +394,7 @@ void LoRaClass::setTxPower(int level, int outputPin)
       level = 17;
     }
 
-    writeRegister(REG_PA_CONFIG, PA_BOOST | (level - 2));
+    writeRegister(REG_PA_CONFIG, PA_BOOST);
   }
 }
 
